@@ -11,7 +11,7 @@ Meila, Marina (2003). Comparing Clusterings by the Variation of Information. Lea
 
 ## Usage
 
-By default, pyvoi uses torch to compute the variation of information.
+By default, pyvoi will try to use torch, then numpy, to compute the variation of information.
 
 ### To get VI values only
     import pyvoi
@@ -59,7 +59,7 @@ By default, pyvoi uses torch to compute the variation of information.
     import pyvoi
     labels1=np.array([0,1,1,2,4])
     labels2=np.array([0,2,3,4,4])
-    vi,vi_split,vi_merge=pyvoi.VI(labels1,labels2,torch=False)
+    vi,vi_split,vi_merge=pyvoi.VI(labels1,labels2)
     print(vi,vi_split,vi_merge)
     #0.5545177444479561 0.27725887222397794 0.27725887222397816
     

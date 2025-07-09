@@ -6,14 +6,14 @@ long_description = (this_directory / "README.md").read_text()
 
 setuptools.setup(
     name="python-voi",
-    version="0.0.2",
+    version="0.0.3",
     author="Core Francisco Park",
     author_email="cfpark00@gmail.com",
     description="Python implementation of Variation of Information",
     long_description=long_description,
     long_description_content_type='text/markdown',
     license='MIT',
-    install_requires=["numpy","torch"],
+    install_requires=["numpy"],
     project_urls={
         "Source": "https://github.com/cfpark00/pyvoi.git"
     },

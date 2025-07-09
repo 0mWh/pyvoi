@@ -1,36 +1,6 @@
 import numpy as np
-import torch
 import numpy.typing as npt
 import warnings
-
-
-def VI(labels1: npt.NDArray[np.int32],labels2: npt.NDArray[np.int32],torch: bool=True,device: str="cpu",return_split_merge: bool=False):
-    """
-    Calculates the Variation of Information between two clusterings.
-
-    Arguments:
-    labels1: flat int32 array of labels for the first clustering
-    labels2: flat int32 array of labels for the second clustering
-    torch: whether to use torch, default:True
-    device: device to use for torch, default:"cpu"
-    return_split_merge: whether to return split and merge terms, default:False
-
-    Returns:
-    vi: variation of information
-    vi_split: split term of variation of information
-    vi_merge: merge term of variation of information
-    splitters(optional): labels of labels2 which are split by labels1. splitters[i,0] is the contribution of the i-th splitter to the VI and splitters[i,1] is the corresponding label of the splitter
-    mergers(optional): labels of labels1 which are merging labels from labels2. mergers[i,0] is the contribution of the i-th merger to the VI and mergers[i,1] is the corresponding label of the merger
-    """
-    if labels1.ndim > 1 or labels2.ndim > 1:
-        warnings.warn(f"Inputs of shape {labels1.shape}, {labels2.shape} are not one-dimensional -- inputs will be flattened.")
-        labels1 = labels1.flatten()
-        labels2 = labels2.flatten()
-        
-    if torch:
-        return VI_torch(labels1,labels2,device=device,return_split_merge=return_split_merge)
-    else:
-        return VI_np(labels1,labels2,return_split_merge=return_split_merge)
 
 def VI_np(labels1,labels2,return_split_merge=False):
     assert len(labels2)==len(labels1)
@@ -117,3 +87,41 @@ def VI_torch(labels1,labels2,device="cpu",return_split_merge=False):
     splitters=torch.stack([vi_split_sorted,sm_unique[i_splitters]],dim=1)
     mergers=torch.stack([vi_merge_sorted,fm_unique[i_mergers]],dim=1)
     return vi,vi_split,vi_merge,splitters,mergers
+
+def VI(
+	labels1:npt.NDArray[np.int32],
+	labels2:npt.NDArray[np.int32],
+	split_merge:bool = False,
+	**kwargs
+):
+	"""
+	Calculates the Variation of Information between two clusterings.
+
+	Arguments:
+	labels1: flat int32 array of labels for the first clustering
+	labels2: flat int32 array of labels for the second clustering
+	split_merge: calculate the split/merge terms (default = False)
+
+	Optional Arguments:
+	device: device to use for torch (default = "cpu")
+
+	Returns: [vi, vi_split, vi_merge, splitters?, mergers?]
+	vi: variation of information
+	vi_split: split term of variation of information
+	vi_merge: merge term of variation of information
+	splitters?: labels of labels2 which are split by labels1. splitters[i,0] is the contribution of the i-th splitter to the VI and splitters[i,1] is the corresponding label of the splitter
+	mergers?: labels of labels1 which are merging labels from labels2. mergers[i,0] is the contribution of the i-th merger to the VI and mergers[i,1] is the corresponding label of the merger
+	"""
+
+	if labels1.ndim > 1 or labels2.ndim > 1:
+		warnings.warn(f"Inputs of shape {labels1.shape}, {labels2.shape} are not one-dimensional -- inputs will be flattened.")
+		labels1 = labels1.flatten()
+		labels2 = labels2.flatten()
+
+	try:
+		import torch
+		return VI_torch(labels1, labels2, kwargs.get('device', 'cpu'), split_merge)
+	except:
+		warnings.warn(f"torch was not imported, falling back to numpy")
+		return VI_np(labels1, labels2, split_merge)
+
